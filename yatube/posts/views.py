@@ -1,29 +1,23 @@
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
-from django.http import HttpResponse
-# Импортируем загрузчик.
-from django.shortcuts import render
+# Импортируем модель, чтобы обратиться к ней
+from .models import Post, Group
 
-# Create your views here.
-# Главная страница
+
 def index(request):
-    template = 'posts/index.html'
-    title = 'Это главная страница проекта Yatube'
+    posts = Post.objects.order_by('-pub_date')[:10]
     context = {
-        'title': title,
-        'text': 'Последние обновления на сайте'
+        'posts': posts,
     }
-    return render(request, template, context)
+    return render(request, 'posts/index.html', context)
 
 
-# Страница с постами
+# View-функция для страницы сообщества:
 def group_posts(request, slug):
-    template = 'posts/group_list.html'
-    title = 'Здесь будет информация о группах проекта Yatube'
-    poem = ('Вчера Крокодил<br>улыбнулся так злобно,<br>Что мне до сих'
-            ' пор<br>за него неудобно.<br> Всем хорошего настроения :)<br>')
+    group = get_object_or_404(Group, slug=slug)
+    posts = Post.objects.filter(group=group).order_by('-pub_date')[:10]
     context = {
-        'title': title,
-        'text': 'Лев Толстой – зеркало русской революции.',
-        'poem': poem
+        'group': group,
+        'posts': posts,
     }
-    return render(request, template, context)
+    return render(request, 'posts/group_list.html', context)
